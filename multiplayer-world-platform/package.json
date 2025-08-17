@@ -1,0 +1,23 @@
+{
+  "name": "multiplayer-world-platform",
+  "version": "1.0.0",
+  "description": "A massively multiplayer web platform using OpenStreetMap for global territorial gameplay",
+  "main": "index.js",
+  "scripts": {
+    "install:all": "npm install && cd frontend && npm install && cd ../backend && npm install",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm start",
+    "build": "cd frontend && npm run build",
+    "start": "cd backend && npm start",
+    "docker:build": "docker-compose build",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down"
+  },
+  "keywords": ["multiplayer", "openstreetmap", "strategy", "realtime", "territorial"],
+  "author": "Multiplayer World Platform Team",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^7.6.0"
+  }
+}
