@@ -1,0 +1,132 @@
+version: '3.8'
+
+services:
+  # PostgreSQL database with PostGIS extension
+  database:
+    image: postgis/postgis:15-3.3
+    container_name: multiplayer-world-db
+    environment:
+      POSTGRES_DB: multiplayer_world_platform
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init:/docker-entrypoint-initdb.d
+    networks:
+      - multiplayer-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d multiplayer_world_platform"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Backend API server
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: multiplayer-world-backend
+    environment:
+      NODE_ENV: production
+      PORT: 5000
+      HOST: 0.0.0.0
+      DB_HOST: database
+      DB_PORT: 5432
+      DB_NAME: multiplayer_world_platform
+      DB_USER: postgres
+      DB_PASSWORD: password
+      DB_SSL: false
+      JWT_SECRET: your-super-secret-jwt-key-change-this-in-production
+      JWT_EXPIRES_IN: 7d
+      BCRYPT_ROUNDS: 12
+      RATE_LIMIT_WINDOW_MS: 900000
+      RATE_LIMIT_MAX_REQUESTS: 100
+      SOCKET_CORS_ORIGIN: http://localhost:3000
+      SOCKET_PING_TIMEOUT: 60000
+      SOCKET_PING_INTERVAL: 25000
+      MAX_PLAYERS_PER_COUNTRY: 50
+      MOVEMENT_COOLDOWN_MS: 1000
+      BORDER_PUSH_COOLDOWN_MS: 5000
+      WAR_DECLARATION_COOLDOWN_MS: 300000
+      DEFAULT_ZOOM_LEVEL: 2
+      MIN_ZOOM_LEVEL: 1
+      MAX_ZOOM_LEVEL: 18
+      LOG_LEVEL: info
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend/logs:/app/logs
+    networks:
+      - multiplayer-network
+    depends_on:
+      database:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+
+  # Frontend React application
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        REACT_APP_API_URL: http://localhost:5000
+        REACT_APP_SOCKET_URL: http://localhost:5000
+    container_name: multiplayer-world-frontend
+    ports:
+      - "3000:80"
+    networks:
+      - multiplayer-network
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  # Redis for session storage and caching (optional)
+  redis:
+    image: redis:7-alpine
+    container_name: multiplayer-world-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - multiplayer-network
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+
+  # Nginx reverse proxy (for production)
+  nginx:
+    image: nginx:alpine
+    container_name: multiplayer-world-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    networks:
+      - multiplayer-network
+    depends_on:
+      - frontend
+      - backend
+    restart: unless-stopped
+    profiles:
+      - production
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  multiplayer-network:
+    driver: bridge

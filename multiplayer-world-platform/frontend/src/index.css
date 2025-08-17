@@ -1,0 +1,192 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Leaflet CSS overrides */
+.leaflet-container {
+  height: 100vh;
+  width: 100%;
+  z-index: 1;
+}
+
+.leaflet-popup-content-wrapper {
+  @apply bg-white rounded-lg shadow-lg;
+}
+
+.leaflet-popup-content {
+  @apply text-sm;
+  margin: 8px 12px;
+}
+
+.leaflet-popup-tip {
+  @apply bg-white;
+}
+
+/* Custom scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  @apply bg-neutral-100;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-neutral-300 rounded-full;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  @apply bg-neutral-400;
+}
+
+/* Animation utilities */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+.slide-in-right {
+  animation: slideInRight 0.3s ease-out;
+}
+
+.slide-out-right {
+  animation: slideOutRight 0.3s ease-in;
+}
+
+/* War-related animations */
+.border-contested {
+  animation: contested 1.5s ease-in-out infinite alternate;
+}
+
+.border-push-indicator {
+  animation: borderPush 2s ease-in-out infinite;
+}
+
+/* Country colors - will be dynamically set */
+.country-claimed {
+  opacity: 0.8;
+}
+
+.country-unclaimed {
+  @apply fill-neutral-200 stroke-neutral-400;
+  opacity: 0.6;
+}
+
+.country-at-war {
+  @apply stroke-war-500;
+  stroke-width: 2;
+  animation: pulse 2s infinite;
+}
+
+/* Player markers */
+.player-marker {
+  @apply bg-primary-500 border-2 border-white rounded-full shadow-lg;
+  width: 12px;
+  height: 12px;
+}
+
+.player-marker-owner {
+  @apply bg-yellow-500;
+  width: 16px;
+  height: 16px;
+}
+
+.player-marker-self {
+  @apply bg-green-500 ring-2 ring-green-300;
+  width: 14px;
+  height: 14px;
+}
+
+/* Chat styles */
+.chat-message {
+  @apply p-2 rounded-lg mb-2 break-words;
+  max-width: 80%;
+}
+
+.chat-message-self {
+  @apply bg-primary-100 ml-auto;
+}
+
+.chat-message-other {
+  @apply bg-neutral-100;
+}
+
+.chat-message-system {
+  @apply bg-yellow-50 text-yellow-800 text-center italic;
+  max-width: 100%;
+}
+
+/* Loading states */
+.loading-spinner {
+  @apply inline-block w-4 h-4 border-2 border-current border-r-transparent rounded-full;
+  animation: spin 1s linear infinite;
+}
+
+.loading-dots::after {
+  content: '';
+  animation: dots 1.5s steps(5, end) infinite;
+}
+
+@keyframes dots {
+  0%, 20% {
+    color: rgba(0,0,0,0);
+    text-shadow:
+      .25em 0 0 rgba(0,0,0,0),
+      .5em 0 0 rgba(0,0,0,0);
+  }
+  40% {
+    color: currentColor;
+    text-shadow:
+      .25em 0 0 rgba(0,0,0,0),
+      .5em 0 0 rgba(0,0,0,0);
+  }
+  60% {
+    text-shadow:
+      .25em 0 0 currentColor,
+      .5em 0 0 rgba(0,0,0,0);
+  }
+  80%, 100% {
+    text-shadow:
+      .25em 0 0 currentColor,
+      .5em 0 0 currentColor;
+  }
+}
+
+/* Utility classes */
+.glass-effect {
+  @apply bg-white bg-opacity-80 backdrop-blur-sm;
+}
+
+.gradient-border {
+  background: linear-gradient(white, white) padding-box,
+              linear-gradient(45deg, #3b82f6, #8b5cf6) border-box;
+  border: 2px solid transparent;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .leaflet-control-container {
+    display: none;
+  }
+  
+  .mobile-hidden {
+    display: none;
+  }
+}
